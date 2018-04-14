@@ -1,0 +1,38 @@
+# Java Files
+*.class
+
+# Git
+*~
+
+# gradle
+.gradle
+/build/
+
+# InteliJ
+*.iml
+.idea*
+# 2017.2 generates the out/ folder when building the project (remove)
+out/
+
+# Eclipse
+/bin/
+.settings
+.project
+.classpath
+
+# OSX
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows shortcuts
+*.lnk
+
+# java VM crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# repository
+## TODO list accross branches
+TODO.txt
+## folder for temporary files
+tmp/
