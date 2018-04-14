@@ -11,6 +11,10 @@ The main aims of the project are to:
 
 Enjoy diving into your Pool-Seq in the _**swimpler**_ way!
 
+## Contributing
+
+Please read [CONTRIBUTING.md](https://github.com/bioinformagik/swimpool/blob/master/CONTRIBUTING.md) for details on our code of conduct, and the process for collaborating on the project.
+
 ## Authors
 
 The authors list is maintained in the [AUTHORS](https://github.com/bioinformagik/swimpool/blob/master/AUTHORS) file.
