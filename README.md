@@ -18,4 +18,4 @@ See also the [Contributors](https://github.com/bioinformagik/swimpool/graphs/con
 
 ## License
 
-Licensed under the BSD License. See the [LICENSE.txt](https://github.com/bioinformagik/swimpool/blob/master/LICENSE.TXT) file.
+Licensed under the BSD License. See the [LICENSE.txt](https://github.com/bioinformagik/swimpool/blob/master/LICENSE.txt) file.
