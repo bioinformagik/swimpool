@@ -11,9 +11,9 @@ _Grab your swimsuit and let's go!_
 #### Table Of Contents
 * [Code of conduct](#code-of-conduct)
 * [How to contribute](#how-to-contribute)
-  - [How can I help?](how-can-I-help)
+  - [How can I help?](#how-can-i-help)
   - [Bug reports](#bug-reports)
-  - [Suggesting enhancements](#suggesting-enhancements)
+  - [Suggesting enhancements/features](#suggesting-enhancements-and-features)
   - [Code contributions](#code-contributions)
 * [Recognition model](#recognition-model)
   - [Become a maintainer](#become-a-maintainer)
@@ -55,11 +55,11 @@ any Assignee(s) already.
 Before submitting a new bug report, please check the issues marked with
 [bug][bug_issues] or search for keywords in our [Issue Tracker][issue_tracker].
 
-### Suggesting enhancements and feature requests
+### Suggesting enhancements and features
 
-Before suggesting a new enhancement or feature request, please check the 
-issues marked with [enhancement][enhancement_issues],
-[feature request][feature_request_issues], or search for related keywords in 
+Before suggesting enhancement or new features, please check the 
+issues marked with [enhancement][enhancement_issues]/
+[feature request][feature_request_issues] or search for related keywords in 
 our [Issue Tracker][issue_tracker].
 
 ### Code contributions
@@ -80,7 +80,7 @@ If you have contributed with high-quality code and/or ideas for the project
 development, you might receive an email to join the group. In case that you 
 are interested and believe that you are qualified to contribute to the code, 
 just *jump to the swimming pool* without any doubt and send us an email to
-<bioinformatik@gmail.com>. 
+<bioinformagik@gmail.com>. 
 
 [code_of_conduct]: https://github.com/bioinformagik/swimpool/blob/master/CODE_OF_CONDUCT.md
 [issue_tracker]: https://github.com/bioinformagik/swimpool/issues
