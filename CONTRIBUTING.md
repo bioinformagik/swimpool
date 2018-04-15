@@ -58,9 +58,9 @@ Before submitting a new bug report, please check the issues marked with
 ### Suggesting enhancements and features
 
 Before suggesting enhancement or new features, please check the 
-issues marked with [enhancement][enhancement_issues]/
-[feature request][feature_request_issues] or search for related keywords in 
-our [Issue Tracker][issue_tracker].
+issues marked with
+[enhancement][enhancement_issues]/[feature request][feature_request_issues]
+or search for related keywords in our [Issue Tracker][issue_tracker].
 
 ### Code contributions
 
