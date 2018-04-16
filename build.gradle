@@ -1,0 +1,177 @@
+// Dependencies for the buildscript (not the program)
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter() // for shadow plugin
+        // gitsemver plugin repository
+        maven {
+            url "http://dl.bintray.com/palantir/releases"
+        }
+    }
+    dependencies {
+        classpath 'com.palantir:gradle-gitsemver:0.7.2'
+    }
+}
+
+plugins {
+    id "java"
+    id "application"
+    id "jacoco"
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
+}
+
+apply plugin: 'gitsemver'
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+// No Windows support
+startScripts {
+    doLast {
+        delete windowsScript
+    }
+}
+
+group = 'org.bioinformagik'
+description = """Dive into your Pool-Seq data in the swimpler way"""
+version = 'dev' // TODO: use semverVersion() once the first tag appears
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+mainClassName = group + "." + rootProject.name + ".Main"
+
+repositories {
+    mavenCentral()
+    jcenter()
+
+    // artifactory for checking un-released Broadinstitute artifacts (HTSJDK/GATK/Barclay)
+    maven {
+        url "https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot/"
+    }
+}
+
+// versions for the dependencies
+final gatkVersion = '4.0.3.0'
+final htsjdkVersion = '2.14.3'
+final testngVersion = '6.14.3'
+final mockitoVersion = '2.18.0'
+
+configurations.all {
+    resolutionStrategy {
+        // force the htsjdk version so we don't get a different one transitively via GATK
+        force 'com.github.samtools:htsjdk:' + htsjdkVersion
+        // later versions explode Hadoop
+        // TODO: this is the same in GATK, but we should check if they solve this issue in the future
+        force 'com.google.protobuf:protobuf-java:3.0.0-beta-1'
+        // force test dependencies so we don't pick up a different version via GenomicsDB/GATK
+        force 'org.testng:testng:' + testngVersion
+        force 'org.mockito:mockito-core:' + mockitoVersion
+    }
+    // exclude all junit to avoid using it on our tests
+    all*.exclude group: 'junit', module: 'junit'
+}
+
+dependencies {
+    compile group: 'org.broadinstitute', name: 'gatk', version: gatkVersion
+    compile group: 'com.github.samtools', name: 'htsjdk', version: htsjdkVersion
+    testCompile group: 'org.testng', name: 'testng', version: testngVersion
+    testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.3'
+}
+
+tasks.withType(Jar) {
+    manifest {
+        attributes 'Implementation-Title': rootProject.name,
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': project.group,
+                'Main-Class': project.mainClassName,
+                'GATK-Version': gatkVersion,
+                'htsjdk-Version': htsjdkVersion
+    }
+}
+
+// test task
+tasks.withType(Test) {
+
+    // tests could be always re-run
+    outputs.upToDateWhen { false }
+    String TEST_VERBOSITY = "$System.env.TEST_VERBOSITY"
+
+    useTestNG()
+
+    // show the stdout/stderr of the test JVM(s) on the console
+    testLogging.showStandardStreams = true
+
+    // set heap size for the test JVM(s)
+    minHeapSize = "1G"
+    maxHeapSize = "2G"
+
+    if (TEST_VERBOSITY == "minimal") {
+        int count = 0
+        // listen to events in the test execution lifecycle
+        logger.lifecycle("Minimal test verbosity");
+
+        beforeTest { descriptor ->
+            count++
+            if( count % 100 == 0) {
+                logger.lifecycle("Finished "+ Integer.toString(count) + " tests")
+            }
+        }
+    } else {
+        // log the test that is running
+        beforeTest { descriptor ->
+            logger.lifecycle("Running Test: " + descriptor)
+        }
+
+        // listen to standarrd out and standard error of the test JVM(s)
+        def testOutput = ""
+        onOutput { descriptor, event ->
+            logger.lifecycle("Test: " + descriptor + " standard out/err -> " + event.message)
+        }
+    }
+
+    // logging after the tests
+    testLogging {
+        testLogging {
+            events "skipped", "failed"
+            exceptionFormat = "full"
+        }
+        afterSuite { desc, result ->
+            if (!desc.parent) { // will match the outermost suite
+                println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+            }
+        }
+    }
+}
+
+// test report configuration
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+// TODO: maybe add this options?
+// compileJava {
+//  options.compilerArgs = ['-proc:none', '-Xlint:all', '-Werror', '-Xdiags:verbose']
+// }
+// compileTestJava {
+//  options.compilerArgs = ['-proc:none', '-Xlint:all', '-Werror', '-Xdiags:verbose']
+//}
+
+tasks.withType(ShadowJar) {
+    zip64 true
+    mergeServiceFiles()
+    exclude '**/*.SF' // these are Manifest signature files and
+    exclude '**/*.RSA' // keys which may accidentally be imported from other signed projects and then fail at runtime
+
+    // In OSX, uncompressing the packaged jar fails due to collision in license names
+    // due to the case-insensitive file system
+    // using the license transformer from the gradle shadow plugin should solve the issue
+    transform(com.github.jengelman.gradle.plugins.shadow.transformers.ApacheLicenseResourceTransformer)
+}
