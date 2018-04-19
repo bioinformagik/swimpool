@@ -17,7 +17,7 @@ plugins {
     id "java"
     id "application"
     id "jacoco"
-    id 'com.github.johnrengelman.shadow' version '2.0.2'
+    id 'com.github.johnrengelman.shadow' version '2.0.2' // performance regresion with 2.0.3
 }
 
 apply plugin: 'gitsemver'
@@ -55,6 +55,12 @@ final htsjdkVersion = '2.14.3'
 final testngVersion = '6.14.3'
 final mockitoVersion = '2.18.0'
 
+configurations {
+    doc {
+        transitive false
+    }
+}
+
 configurations.all {
     resolutionStrategy {
         // force the htsjdk version so we don't get a different one transitively via GATK
@@ -71,30 +77,49 @@ configurations.all {
 }
 
 dependencies {
+    // for compilation
     compile group: 'org.broadinstitute', name: 'gatk', version: gatkVersion
     compile group: 'com.github.samtools', name: 'htsjdk', version: htsjdkVersion
+
+    // to compile the tests
     testCompile group: 'org.testng', name: 'testng', version: testngVersion
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+
+    // for documentation (internal or external)
+    doc group: 'org.broadinstitute', name: 'gatk', version: gatkVersion
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.3'
+    gradleVersion = '4.6'
 }
 
 tasks.withType(Jar) {
     manifest {
+        // this are our custom attributes: title, version, vendor and main class
+        // in addition, we include the versions for GATK and HTSJDK
         attributes 'Implementation-Title': rootProject.name,
                 'Implementation-Version': project.version,
                 'Implementation-Vendor': project.group,
                 'Main-Class': project.mainClassName,
                 'GATK-Version': gatkVersion,
                 'htsjdk-Version': htsjdkVersion
+        // TODO: we should include some attributes from the GATK manifest, but prioritizing ours
+        // TODO: this current implementation behind does not work, because it just copy their manifest
+        // TODO: I think that it is lazily loaded and that's why
+        // TODO: in addition, this fails with ./gradlew clean shadowJar
+//        from files(project.configurations.doc.collect { zipTree(it).matching { include { it.path.contains('MANIFEST.MF') } } }).getFiles().toArray() {
+//
+//            eachEntry { details ->
+//                if (details.baseValue != details.mergeValue) {
+//                    details.mergeValue = "hello"
+//                }
+//            }
+//        }
     }
 }
 
 // test task
 tasks.withType(Test) {
-
     // tests could be always re-run
     outputs.upToDateWhen { false }
     String TEST_VERBOSITY = "$System.env.TEST_VERBOSITY"
